@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Task Management App</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#eef2ff;margin:0;padding:20px}
+.container{max-width:1000px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+h1{text-align:center;color:#2563eb}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input,select{padding:10px;border:1px solid #ccc;border-radius:6px}
+button{padding:10px 15px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer}
+.task{border:1px solid #ddd;padding:12px;border-radius:8px;margin-top:10px}
+.badge{padding:4px 8px;border-radius:10px;background:#e5e7eb}
+.login{max-width:400px;margin:60px auto}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<div id="loginPage" class="container login">
+<h2>Login</h2>
+<input id="username" placeholder="Username"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+<button onclick="login()">Login</button>
+<p>Demo: any username/password</p>
+</div>
+
+<div id="app" class="container hidden">
+<h1>Task Management Application</h1>
+
+<div class="row">
+<input id="title" placeholder="Task Title">
+<input id="dueDate" type="date">
+<select id="status">
+<option>Pending</option>
+<option>In Progress</option>
+<option>Completed</option>
+</select>
+<button onclick="addTask()">Add Task</button>
+</div>
+
+<h3>Tasks</h3>
+<div id="taskList"></div>
+</div>
+
+<script>
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+function login(){
+  const u=document.getElementById("username").value;
+  if(!u){alert("Enter username");return;}
+  localStorage.setItem("user",u);
+  document.getElementById("loginPage").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  render();
+}
+
+if(localStorage.getItem("user")){
+  document.getElementById("loginPage").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+}
+
+function save(){
+ localStorage.setItem("tasks",JSON.stringify(tasks));
+ render();
+}
+
+function addTask(){
+ const title=document.getElementById("title").value;
+ const due=document.getElementById("dueDate").value;
+ const status=document.getElementById("status").value;
+
+ if(!title) return alert("Enter task title");
+
+ tasks.push({title,due,status});
+ save();
+
+ document.getElementById("title").value="";
+}
+
+function render(){
+ const list=document.getElementById("taskList");
+ list.innerHTML="";
+ tasks.forEach((t,i)=>{
+   list.innerHTML += `
+   <div class="task">
+     <strong>${t.title}</strong><br>
+     Due: ${t.due || "N/A"}<br>
+     <span class="badge">${t.status}</span><br><br>
+     <button onclick="editTask(${i})">Edit</button>
+     <button onclick="deleteTask(${i})">Delete</button>
+   </div>`;
+ });
+}
+
+function editTask(i){
+ const title=prompt("Task title",tasks[i].title);
+ if(title) tasks[i].title=title;
+ save();
+}
+
+function deleteTask(i){
+ tasks.splice(i,1);
+ save();
+}
+
+render();
+</script>
+</body>
+</html>
